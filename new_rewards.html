@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reward Chart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Rewards" />
+  <meta name="theme-color" content="#f8f9ff" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #e9eaff 0%, #e6f2ff 100%);
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(180deg, #f4f5ff 0%, #f2f8ff 100%);
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+
+    /* Header */
+
+    .section-header {
+      background: linear-gradient(90deg, #eef2ff, #f5f7ff);
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .header {
+      position: relative;
+      background: white;
+      padding: 10px 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 10;
+    }
+
+    .hamburger {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: none;
+      background: #f0f2ff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .hamburger span {
+      height: 3px;
+      border-radius: 2px;
+      background: #5b6ee1;
+    }
+
+    .profile-area {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #e3e6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-name-select {
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      color: #344085;
+      font-size: 15px;
+      padding-right: 4px;
+    }
+
+    .profile-name-select:focus {
+      outline: none;
+    }
+
+    .streak-pill {
+      background: #fff4c4;
+      color: #8b6b00;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      transition: box-shadow 0.2s ease;
+    }
+
+    /* NEW: streak glow */
+    .streak-pill.glow {
+      animation: glowPulse 0.8s ease;
+    }
+    @keyframes glowPulse {
+      0% { box-shadow: 0 0 0 rgba(255,200,0,0); }
+      50% { box-shadow: 0 0 14px rgba(255,200,0,0.9); }
+      100% { box-shadow: 0 0 0 rgba(255,200,0,0); }
+    }
+
+    /* Side menu */
+
+    .side-menu-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 20;
+    }
+
+    .side-menu-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .side-menu {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 260px;
+      height: 100%;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+      transform: translateX(-100%);
+      transition: transform 0.2s ease;
+      padding: 16px;
+      z-index: 21;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .side-menu.open {
+      transform: translateX(0);
+    }
+
+    .side-menu h2 {
+      font-size: 18px;
+      color: #4952c6;
+      margin-bottom: 8px;
+    }
+
+    .menu-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .menu-section {
+      margin-bottom: 14px;
+    }
+
+    .view-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .view-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 7px 13px;
+      font-size: 13px;
+      background: #f2f3ff;
+      color: #555;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .view-btn.active {
+      background: #5b6ee1;
+      color: white;
+      box-shadow: 0 2px 6px rgba(91,110,225,0.35);
+    }
+
+    .profile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .profile-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #f7f7ff;
+    }
+
+    .profile-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .small-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #e3e6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .small-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-row button {
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: #e05353;
+      cursor: pointer;
+    }
+
+    .small-link-btn {
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      color: #5b6ee1;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
+      text-align: left;
+    }
+
+    .small-link-btn.danger {
+      color: #e05353;
+    }
+
+    .small {
+      font-size: 11px;
+      color: #888;
+    }
+
+    /* Main content */
+
+    .content {
+      flex: 1;
+      padding: 12px 14px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .card:active {
+      transform: scale(0.99);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.07);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #4952c6;
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Views */
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* Day view */
+
+    .day-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .day-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 16px;
+    }
+
+    .day-date {
+      font-size: 12px;
+      color: #777;
+    }
+
+    .quote-text {
+      font-style: italic;
+      font-size: 13px;
+      color: #4a4f8a;
+      line-height: 1.4;
+    }
+
+    .tasks-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .icon-btn {
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .tasks-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .task-tile {
+      border-radius: 14px;
+      padding: 8px;
+      text-align: center;
+      background: #f6f7ff;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80px;
+    }
+
+    .task-tile span.emoji {
+      font-size: 22px;
+      margin-bottom: 4px;
+    }
+
+    .task-tile span.label {
+      font-size: 11px;
+      font-weight: 500;
+      color: #555;
+    }
+
+    .task-tile.completed {
+      background: #e8f9ee;
+      border-color: #35b56d;
+      box-shadow: 0 2px 6px rgba(53,181,109,0.3);
+    }
+
+    .task-tile.disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* (Kept CSS in case you ever want it back; tile is removed in JS) */
+    .add-task-btn {
+      border-radius: 14px;
+      background: #ffe7f3;
+      border: 2px dashed #ff72b5;
+      color: #c64082;
+      font-size: 12px;
+      padding: 8px;
+      cursor: pointer;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .verdict-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      text-align: center;
+      padding: 12px;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #f5f7ff, #ffffff);
+    }
+
+    .verdict-buttons {
+      display: flex;
+      gap: 14px;
+    }
+
+    .verdict-btn {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: none;
+      font-size: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+      background: #f5f5f5;
+      transition: transform 0.08s ease;
+    }
+    .verdict-btn:active { transform: scale(0.96); }
+
+    /* NEW: Green for YES, Orange for NO */
+    .verdict-btn.selected.good {
+      background: #e3f9e8;
+      box-shadow: 0 3px 10px rgba(53,181,109,0.35);
+    }
+
+    .verdict-btn.selected.bad {
+      background: #ffe8cc;
+      box-shadow: 0 3px 10px rgba(245,158,11,0.35);
+    }
+
+    .undo-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 14px;
+      font-size: 12px;
+      background: #ddd;
+      color: #555;
+      cursor: pointer;
+    }
+
+    /* Badges */
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .badge {
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      background: #f1f2ff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .badge.earned {
+      background: #ffe483;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .badge-label {
+      font-size: 9px;
+      margin-top: 3px;
+      text-align: center;
+    }
+
+    /* Week view */
+
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .week-day-card {
+      border-radius: 10px;
+      background: #f7f7ff;
+      padding: 4px 2px;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    .week-day-name {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .week-day-num {
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .week-day-status {
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    /* Month view */
+
+    .month-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .month-nav-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 4px 8px;
+      font-size: 12px;
+      background: #e3e6ff;
+      cursor: pointer;
+    }
+
+    .month-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .month-cell-header {
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      color: #777;
+      padding: 2px 0;
+    }
+
+    .month-cell {
+      min-height: 40px;
+      border-radius: 8px;
+      background: #f7f7ff;
+      padding: 2px 4px;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .month-cell.today {
+      border: 2px solid #5b6ee1;
+    }
+
+    /* NEW: Green/orange for month cells */
+    .month-cell.good {
+      background: #e3f9e8;
+    }
+
+    .month-cell.bad {
+      background: #ffe8cc;
+    }
+
+    .month-day-number {
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .month-day-status {
+      font-size: 13px;
+    }
+
+    /* Rewards view */
+
+    .reward-wheel-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+      margin-top: 4px;
+    }
+
+    .reward-wheel {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: 8px solid #f0e5ff;
+      background: conic-gradient(#ffcdd2 0 60deg, #fff9c4 60deg 120deg, #c8e6c9 120deg 180deg, #bbdefb 180deg 240deg, #ffe0b2 240deg 300deg, #e1bee7 300deg 360deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 2.5s ease-out;
+      position: relative;
+    }
+
+    .reward-wheel-center {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .reward-options-list {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .reward-option-card {
+      border-radius: 14px;
+      padding: 10px;
+      background: #f7f7ff;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .reward-option-card span {
+      font-size: 14px;
+    }
+
+    .reward-option-card.selected {
+      background: #ffe483;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    }
+
+    .reward-option-card.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .history-item {
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: #f7f7ff;
+      font-size: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .history-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .redeem-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 4px 10px;
+      font-size: 12px;
+      background: #5b6ee1;
+      color: white;
+      cursor: pointer;
+    }
+
+    .redeemed-label {
+      font-size: 11px;
+      color: #35b56d;
+      font-weight: 600;
+    }
+
+    .primary-btn {
+      width: 100%;
+      border-radius: 14px;
+      border: none;
+      padding: 10px;
+      font-size: 14px;
+      background: #ff6b81;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 6px;
+      box-shadow: 0 4px 12px rgba(255,107,129,0.4);
+    }
+
+    .mt-6 { margin-top: 6px; }
+    .mt-10 { margin-top: 10px; }
+
+    /* Modals */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 30;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: white;
+      border-radius: 18px;
+      padding: 16px;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    }
+
+    .modal-card h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: #4952c6;
+    }
+
+    .modal-row {
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .modal-row label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: #555;
+    }
+
+    .modal-row input {
+      width: 100%;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 13px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-secondary {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      background: #eee;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      border-radius: 999px;
+      border: none;
+      padding: 6px 12px;
+      font-size: 13px;
+      background: #5b6ee1;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Edit tasks list */
+
+    .edit-task-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+
+    .edit-task-main {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .edit-task-emoji {
+      font-size: 18px;
+    }
+
+    .edit-task-label {
+      font-size: 13px;
+    }
+
+    .edit-task-buttons {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .small-icon-btn {
+      border: none;
+      background: #eee;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    /* Avatar modal */
+
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 10px;
+    }
+
+    .avatar-emoji-btn {
+      border-radius: 50%;
+      border: none;
+      padding: 6px;
+      font-size: 20px;
+      background: #f7f7ff;
+      cursor: pointer;
+    }
+
+    .avatar-emoji-btn:hover {
+      background: #e3e6ff;
+    }
+
+    /* Simple toggle switch (for Sound toggle) */
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+    .switch {
+      width: 44px;
+      height: 24px;
+      background: #d1d5db;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+    }
+    .switch.on { background: #22c55e; }
+    .switch span {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 18px;
+      height: 18px;
+      background: white;
+      border-radius: 50%;
+      transition: left 0.18s ease;
+    }
+    .switch.on span { left: 23px; }
+  </style>
+</head>
+
+<body>
+<div class="app">
+  <header class="header">
+    <button class="hamburger" id="menuButton">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <div class="profile-area">
+      <div class="avatar-circle" id="headerAvatar"></div>
+      <select id="profileSelect" class="profile-name-select"></select>
+    </div>
+
+    <div class="streak-pill" id="streakPill">Streak: 0🔥</div>
+  </header>
+
+  <!-- Side menu -->
+  <div class="side-menu-backdrop" id="menuBackdrop">
+    <nav class="side-menu" id="sideMenu">
+      <div>
+        <h2>Menu</h2>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Views</div>
+        <div class="view-buttons">
+          <button class="view-btn active" data-view="day">Day</button>
+          <button class="view-btn" data-view="week">Week</button>
+          <button class="view-btn" data-view="month">Month</button>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Profiles</div>
+        <div class="profile-list" id="menuProfileList"></div>
+        <button class="small-link-btn" id="addProfileBtn">+ Add child</button>
+        <button class="small-link-btn danger" id="deleteProfileBtn">Delete current</button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Avatar</div>
+        <button class="small-link-btn" id="changeAvatarEmojiBtn">Change avatar</button>
+      </div>
+
+      <div class="menu-section">
+        <div class="menu-label">Rewards</div>
+        <button class="small-link-btn" id="openRewardsViewBtn">Reward Time!</button>
+      </div>
+
+      <!-- NEW: Sound toggle -->
+      <div class="menu-section">
+        <div class="menu-label">Settings</div>
+        <div class="switch-row">
+          <span>Sounds</span>
+          <div class="switch" id="soundSwitch" role="switch" aria-checked="false">
+            <span></span>
+          </div>
+        </div>
+        <div class="small">Sounds are OFF by default.</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Main content -->
+  <main class="content">
+    <!-- Day view -->
+    <section id="dayView" class="view active">
+      <div class="card">
+        <div class="day-header">
+          <div>
+            <div class="day-title" id="dayTitle">Today</div>
+            <div class="day-date" id="dayDate"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Motivational quote (top, no label text) -->
+      <div class="card">
+        <div id="quoteText" class="quote-text">
+          You are capable of amazing things. ✨
+        </div>
+      </div>
+
+      <!-- Tasks -->
+      <div class="card">
+        <div class="tasks-header-row">
+          <div class="card-title">Today's Tasks</div>
+          <button class="icon-btn" id="editTasksBtn">✏️</button>
+        </div>
+        <div class="tasks-grid" id="tasksGrid"></div>
+      </div>
+
+      <!-- Verdict -->
+      <div class="card">
+        <div class="verdict-row">
+          <div class="card-title">How was the day?</div>
+          <div class="verdict-buttons">
+            <button class="verdict-btn" id="goodBtn">⭐</button>
+            <button class="verdict-btn" id="badBtn">❌</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Badges -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Badges</div>
+          <div class="card-sub" id="badgeSummary"></div>
+        </div>
+        <div id="badgeRow" class="badge-row"></div>
+      </div>
+    </section>
+
+    <!-- Week view -->
+    <section id="weekView" class="view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">This Week</div>
+          <div class="card-sub">Quick view of the week</div>
+        </div>
+        <div id="weekGrid" class="week-grid"></div>
+      </div>
+    </section>
+
+    <!-- Month view -->
+    <section id="monthView" class="view">
+      <div class="card">
+        <div class="month-header">
+          <button class="month-nav-btn" id="prevMonthBtn">‹</button>
+          <div class="card-title" id="monthTitle"></div>
+          <button class="month-nav-btn" id="nextMonthBtn">›</button>
+        </div>
+        <div class="month-grid" id="monthGrid"></div>
+      </div>
+    </section>
+
+    <!-- Rewards view -->
+    <section id="rewardsView" class="view">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reward Time!</div>
+          <div class="card-sub">Spin the wheel, then pick 1 reward</div>
+        </div>
+
+        <div class="reward-wheel-container">
+          <div class="reward-wheel" id="rewardWheel">
+            <div class="reward-wheel-center">🎁</div>
+          </div>
+        </div>
+
+        <button class="primary-btn" id="spinWheelBtn">Spin the Wheel</button>
+        <div class="card-sub mt-6" id="rewardHint"></div>
+
+        <div id="rewardOptionsList" class="reward-options-list"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Reward List</div>
+        </div>
+        <div id="rewardHistory" class="history-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Add task modal -->
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal-card">
+      <h3>Add Task</h3>
+      <div class="modal-row">
+        <label for="taskEmojiInput">Emoji</label>
+        <input id="taskEmojiInput" placeholder="Ex: 🧹" />
+      </div>
+      <div class="modal-row">
+        <label for="taskLabelInput">Task name</label>
+        <input id="taskLabelInput" placeholder="Ex: Clean Room" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelTaskBtn">Cancel</button>
+        <button class="btn-primary" id="saveTaskBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit tasks modal -->
+  <div class="modal-backdrop" id="editTasksModal">
+    <div class="modal-card">
+      <h3>Customize Tasks</h3>
+      <div class="modal-row small">
+        Reorder or remove tasks. Changes apply only to this child.
+      </div>
+      <div id="editTasksList"></div>
+
+      <!-- NEW: Add Task lives here now (instead of a tile in the grid) -->
+      <div class="modal-actions" style="justify-content: space-between;">
+        <button class="btn-secondary" id="addTaskFromEditBtn">+ Add Task</button>
+        <button class="btn-secondary" id="closeEditTasksBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add profile modal -->
+  <div class="modal-backdrop" id="profileModal">
+    <div class="modal-card">
+      <h3>Add Child</h3>
+      <div class="modal-row">
+        <label for="profileNameInput">Name</label>
+        <input id="profileNameInput" placeholder="Name" />
+      </div>
+      <div class="modal-row">
+        <label for="profileEmojiInput">Avatar Emoji</label>
+        <input id="profileEmojiInput" placeholder="Ex: 🐯" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="cancelProfileBtn">Cancel</button>
+        <button class="btn-primary" id="saveProfileBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Avatar modal -->
+  <div class="modal-backdrop" id="avatarModal">
+    <div class="modal-card">
+      <h3>Choose Avatar</h3>
+      <div class="modal-row">
+        <div class="menu-label">Animals</div>
+        <div class="avatar-grid" id="avatarEmojiGrid"></div>
+      </div>
+      <div class="modal-row">
+        <label for="avatarFileInput">Or upload picture</label>
+        <input id="avatarFileInput" type="file" accept="image/*" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" id="closeAvatarBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: Badge unlock modal -->
+  <div class="modal-backdrop" id="badgeModal">
+    <div class="modal-card">
+      <h3>🎉 New Badge!</h3>
+      <div class="modal-row" id="badgeModalText" style="font-size:13px;"></div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="closeBadgeModalBtn">Yay!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: Good Night modal -->
+  <div class="modal-backdrop" id="nightModal">
+    <div class="modal-card">
+      <h3>🌙 Good Night</h3>
+      <div class="modal-row small" style="font-size:13px; line-height:1.35;">
+        Today is done. Tomorrow is a brand new day 💛
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="closeNightBtn">Okay</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function() {
+  const STORAGE_KEY = "kidsRewardApp_v3";
+
+  const defaultProfiles = [
+    { id: "maya", name: "Maya", avatarEmoji: "🌸" },
+    { id: "surya", name: "Surya", avatarEmoji: "🚀" }
+  ];
+
+  const defaultTasks = [
+    { id: "morning", label: "Morning", emoji: "🌞" },
+    { id: "brushTeeth", label: "Brush Teeth", emoji: "🪥" },
+    { id: "breakfast", label: "Breakfast", emoji: "🥣" },
+    { id: "getDressed", label: "Get Dressed", emoji: "👕" },
+    { id: "makeBed", label: "Make Bed", emoji: "🛏️" },
+    { id: "homework", label: "Homework", emoji: "📚" },
+    { id: "cleanRoom", label: "Clean Room", emoji: "🧹" },
+    { id: "kindness", label: "Kindness", emoji: "💖" },
+    { id: "singing", label: "Singing", emoji: "🎵" },
+    { id: "shoes", label: "Shoes", emoji: "👟" },
+    { id: "tidyRoom", label: "Tidy Room", emoji: "🧺" },
+    { id: "goodSibling", label: "Good Sibling", emoji: "👫" },
+    { id: "listening", label: "Listening", emoji: "👂" },
+    { id: "night", label: "Night", emoji: "🌙" }
+  ];
+
+  const rewardPool = [
+    "🍦 Ice Cream",
+    "🎮 20 min Screen Time",
+    "🎁 Mystery Gift",
+    "🍭 Candy",
+    "📺 Movie Night Pick",
+    "🌈 Choose Dinner",
+    "🧩 Board Game",
+    "🎨 Sticker Pack",
+    "🍭 Lollipop",
+    "🍟 Chips Packet",
+    "🎒 Goody Bag",
+    "🧸 New Toy",
+    "❤️ 1 hour with parent",
+    "💵 Cash $1",
+    "💵 Cash $5",
+    "🤗 Cuddle Time"
+  ];
+
+  const avatarAnimals = ["🐱","🐶","🐰","🐻","🐼","🦊","🦁","🐨","🐷","🐸","🦉","🐧"];
+
+  const quotesNeutral = [
+    "You are capable of amazing things. ✨",
+    "Small steps every day add up to big changes. 🌱",
+    "Trying your best is what really matters. 💪",
+    "Every day is a new chance to shine. 🌟"
+  ];
+  const quotesGood = [
+    "What a superstar day! ⭐",
+    "You did such a great job today. I'm proud of you. 💖",
+    "Hard work and kindness – you nailed it today! 🙌",
+    "Today was full of awesome choices. Keep going! 🌈"
+  ];
+  const quotesBad = [
+    "Some days are hard. We can always try again tomorrow. 🌙",
+    "Mistakes help us learn. Tomorrow is a fresh start. 🍃",
+    "Even on tough days, you are loved. ❤️",
+    "It’s okay to have off days. We’ll grow from this. 🌱"
+  ];
+
+  let state = null;
+  let currentProfileId = null;
+  let selectedDate = new Date();
+  let currentMonthOffset = 0;
+
+  // Rewards state
+  let currentRewardChoices = [];
+  let rewardChoiceLocked = false;
+  let isSpinning = false;
+  let currentWheelRotation = 0;
+
+  // NEW: streak tracking for glow
+  let lastStreakValue = 0;
+
+  // NEW: modal guards
+  let badgeModalOpen = false;
+  let nightModalOpen = false;
+
+  // DOM
+  const menuButton = document.getElementById("menuButton");
+  const menuBackdrop = document.getElementById("menuBackdrop");
+  const sideMenu = document.getElementById("sideMenu");
+  const headerAvatar = document.getElementById("headerAvatar");
+  const profileSelect = document.getElementById("profileSelect");
+  const menuProfileList = document.getElementById("menuProfileList");
+  const streakPill = document.getElementById("streakPill");
+
+  const dayView = document.getElementById("dayView");
+  const weekView = document.getElementById("weekView");
+  const monthView = document.getElementById("monthView");
+  const rewardsView = document.getElementById("rewardsView");
+
+  const dayTitle = document.getElementById("dayTitle");
+  const dayDate = document.getElementById("dayDate");
+  const tasksGrid = document.getElementById("tasksGrid");
+  const goodBtn = document.getElementById("goodBtn");
+  const badBtn = document.getElementById("badBtn");
+  const undoVerdictBtn = document.getElementById("undoVerdictBtn");
+  const quoteText = document.getElementById("quoteText");
+  const badgeSummary = document.getElementById("badgeSummary");
+  const badgeRow = document.getElementById("badgeRow");
+  const editTasksBtn = document.getElementById("editTasksBtn");
+
+  const weekGrid = document.getElementById("weekGrid");
+  const monthTitle = document.getElementById("monthTitle");
+  const monthGrid = document.getElementById("monthGrid");
+  const prevMonthBtn = document.getElementById("prevMonthBtn");
+  const nextMonthBtn = document.getElementById("nextMonthBtn");
+
+  // Rewards DOM
+  const rewardWheel = document.getElementById("rewardWheel");
+  const spinWheelBtn = document.getElementById("spinWheelBtn");
+  const rewardOptionsList = document.getElementById("rewardOptionsList");
+  const rewardHistoryContainer = document.getElementById("rewardHistory");
+  const rewardHint = document.getElementById("rewardHint");
+
+  // Modals
+  const taskModal = document.getElementById("taskModal");
+  const taskEmojiInput = document.getElementById("taskEmojiInput");
+  const taskLabelInput = document.getElementById("taskLabelInput");
+  const cancelTaskBtn = document.getElementById("cancelTaskBtn");
+  const saveTaskBtn = document.getElementById("saveTaskBtn");
+
+  const editTasksModal = document.getElementById("editTasksModal");
+  const editTasksList = document.getElementById("editTasksList");
+  const closeEditTasksBtn = document.getElementById("closeEditTasksBtn");
+  const addTaskFromEditBtn = document.getElementById("addTaskFromEditBtn");
+
+  const profileModal = document.getElementById("profileModal");
+  const profileNameInput = document.getElementById("profileNameInput");
+  const profileEmojiInput = document.getElementById("profileEmojiInput");
+  const cancelProfileBtn = document.getElementById("cancelProfileBtn");
+  const saveProfileBtn = document.getElementById("saveProfileBtn");
+
+  const avatarModal = document.getElementById("avatarModal");
+  const avatarEmojiGrid = document.getElementById("avatarEmojiGrid");
+  const avatarFileInput = document.getElementById("avatarFileInput");
+  const closeAvatarBtn = document.getElementById("closeAvatarBtn");
+
+  const addProfileBtn = document.getElementById("addProfileBtn");
+  const deleteProfileBtn = document.getElementById("deleteProfileBtn");
+  const changeAvatarEmojiBtn = document.getElementById("changeAvatarEmojiBtn");
+  const openRewardsViewBtn = document.getElementById("openRewardsViewBtn");
+
+  // NEW: badge + night modals
+  const badgeModal = document.getElementById("badgeModal");
+  const badgeModalText = document.getElementById("badgeModalText");
+  const closeBadgeModalBtn = document.getElementById("closeBadgeModalBtn");
+  const nightModal = document.getElementById("nightModal");
+  const closeNightBtn = document.getElementById("closeNightBtn");
+
+  // NEW: sound toggle UI
+  const soundSwitch = document.getElementById("soundSwitch");
+
+  /* =========================
+     NEW: Confetti + Sound
+     ========================= */
+
+  function confettiBurst(count = 30) {
+    // Confetti ON (always)
+    const colors = ["#ff6b81","#ffd166","#4ade80","#5b6ee1","#f59e0b","#22c55e"];
+    for (let i = 0; i < count; i++) {
+      const p = document.createElement("div");
+      const size = 6 + Math.floor(Math.random()*6);
+      p.style.position = "fixed";
+      p.style.left = Math.random() * 100 + "vw";
+      p.style.top = "-10px";
+      p.style.width = size + "px";
+      p.style.height = size + "px";
+      p.style.background = colors[Math.floor(Math.random() * colors.length)];
+      p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+      p.style.opacity = "0.95";
+      p.style.zIndex = "9999";
+      p.style.pointerEvents = "none";
+      p.style.transform = "translateY(0) rotate(0deg)";
+      p.style.transition = "transform 900ms ease, opacity 900ms ease";
+      document.body.appendChild(p);
+
+      const drift = (Math.random() - 0.5) * 220;
+      const rot = (Math.random() * 720) - 360;
+      requestAnimationFrame(() => {
+        p.style.transform = `translate(${drift}px, ${window.innerHeight + 20}px) rotate(${rot}deg)`;
+        p.style.opacity = "0";
+      });
+
+      setTimeout(() => p.remove(), 950);
+    }
+  }
+
+  // Sounds OFF by default, toggleable
+  function ensureSettings() {
+    state.settings = state.settings || {};
+    if (typeof state.settings.soundsEnabled !== "boolean") state.settings.soundsEnabled = false;
+  }
+
+  function setSoundSwitchUI() {
+    const on = !!state.settings.soundsEnabled;
+    soundSwitch.classList.toggle("on", on);
+    soundSwitch.setAttribute("aria-checked", on ? "true" : "false");
+  }
+
+  function playSound(type) {
+    if (!state?.settings?.soundsEnabled) return; // OFF by default
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AudioCtx();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+
+      if (type === "pop") o.frequency.value = 520;
+      else if (type === "ding") o.frequency.value = 740;
+      else o.frequency.value = 600;
+
+      g.gain.value = 0.06;
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start();
+
+      const duration = type === "ding" ? 0.12 : 0.08;
+      setTimeout(() => {
+        o.stop();
+        ctx.close();
+      }, duration * 1000);
+    } catch (e) {
+      // fail silently
+    }
+  }
+
+  function openBadgeModal(text) {
+    badgeModalText.textContent = text;
+    badgeModal.classList.add("open");
+    badgeModalOpen = true;
+  }
+
+  function closeBadgeModal() {
+    badgeModal.classList.remove("open");
+    badgeModalOpen = false;
+  }
+
+  function openNightModal() {
+    nightModal.classList.add("open");
+    nightModalOpen = true;
+  }
+
+  function closeNightModal() {
+    nightModal.classList.remove("open");
+    nightModalOpen = false;
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        state = JSON.parse(raw);
+      } else {
+        state = {
+          profiles: {},
+          activeProfileId: defaultProfiles[0].id,
+          settings: { soundsEnabled: false }
+        };
+        defaultProfiles.forEach(p => {
+          state.profiles[p.id] = {
+            id: p.id,
+            name: p.name,
+            avatarEmoji: p.avatarEmoji,
+            avatarImageData: null,
+            tasks: JSON.parse(JSON.stringify(defaultTasks)),
+            days: {},
+            rewards: [],
+            badgesUnlocked: []
+          };
+        });
+      }
+    } catch(e) {
+      state = {
+        profiles: {},
+        activeProfileId: null,
+        settings: { soundsEnabled: false }
+      };
+    }
+
+    if (!state.profiles || Object.keys(state.profiles).length === 0) {
+      state.profiles = {};
+      defaultProfiles.forEach(p => {
+        state.profiles[p.id] = {
+          id: p.id,
+          name: p.name,
+          avatarEmoji: p.avatarEmoji,
+          avatarImageData: null,
+          tasks: JSON.parse(JSON.stringify(defaultTasks)),
+          days: {},
+          rewards: [],
+          badgesUnlocked: []
+        };
+      });
+      state.activeProfileId = defaultProfiles[0].id;
+    }
+
+    // NEW: migrate settings + per-profile badgesUnlocked
+    ensureSettings();
+    Object.values(state.profiles).forEach(p => {
+      if (!Array.isArray(p.badgesUnlocked)) p.badgesUnlocked = [];
+      if (!Array.isArray(p.rewards)) p.rewards = [];
+      if (!p.days) p.days = {};
+      if (!p.tasks) p.tasks = JSON.parse(JSON.stringify(defaultTasks));
+    });
+
+    currentProfileId = state.activeProfileId || Object.keys(state.profiles)[0];
+    saveState();
+    setSoundSwitchUI();
+  }
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function getCurrentProfile() {
+    return state.profiles[currentProfileId];
+  }
+
+  function formatShortDate(date) {
+    return date.toLocaleDateString(undefined, {
+      weekday: "short",
+      month: "short",
+      day: "numeric"
+    });
+  }
+
+  function getDateKey(date) {
+    const y = date.getFullYear();
+    const m = (date.getMonth() + 1).toString().padStart(2, "0");
+    const d = date.getDate().toString().padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function randomChoice(arr) {
+    if (!arr.length) return null;
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function renderAvatarInto(el, profile) {
+    el.innerHTML = "";
+    if (profile.avatarImageData) {
+      const img = document.createElement("img");
+      img.src = profile.avatarImageData;
+      el.appendChild(img);
+    } else {
+      el.textContent = profile.avatarEmoji || "🙂";
+    }
+  }
+
+  function renderProfilesUI() {
+    const profileIds = Object.keys(state.profiles);
+    profileSelect.innerHTML = "";
+    profileIds.forEach(id => {
+      const p = state.profiles[id];
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = p.name;
+      profileSelect.appendChild(opt);
+    });
+    profileSelect.value = currentProfileId;
+
+    const profile = getCurrentProfile();
+    renderAvatarInto(headerAvatar, profile);
+
+    menuProfileList.innerHTML = "";
+    profileIds.forEach(id => {
+      const p = state.profiles[id];
+      const row = document.createElement("div");
+      row.className = "profile-row";
+
+      const main = document.createElement("div");
+      main.className = "profile-main";
+
+      const av = document.createElement("div");
+      av.className = "small-avatar";
+      renderAvatarInto(av, p);
+
+      const nameSpan = document.createElement("span");
+      nameSpan.textContent = p.name;
+
+      main.appendChild(av);
+      main.appendChild(nameSpan);
+      row.appendChild(main);
+
+      if (id === currentProfileId) {
+        const tag = document.createElement("span");
+        tag.className = "small";
+        tag.textContent = "Current";
+        row.appendChild(tag);
+      }
+
+      row.addEventListener("click", () => {
+        if (id !== currentProfileId) {
+          currentProfileId = id;
+          state.activeProfileId = id;
+          saveState();
+          renderAllViews();
+        }
+      });
+
+      menuProfileList.appendChild(row);
+    });
+  }
+
+  function computeStreak(profile) {
+    let streak = 0;
+    const today = new Date();
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() - i);
+      const key = getDateKey(d);
+      const entry = profile.days[key];
+      if (entry && entry.verdict === "good") {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+  function renderQuote(verdict) {
+    let pool = quotesNeutral;
+    if (verdict === "good") pool = quotesGood;
+    if (verdict === "bad") pool = quotesBad;
+    quoteText.textContent = randomChoice(pool);
+  }
+
+  function renderBadges(profile, streak) {
+    const badges = [];
+    const anyGood = Object.values(profile.days).some(d => d.verdict === "good");
+    const anyBad = Object.values(profile.days).some(d => d.verdict === "bad");
+    const todayEntry = profile.days[getDateKey(selectedDate)] || { completedTaskIds: [] };
+    const manyTasksToday = (todayEntry.completedTaskIds || []).length >= 8;
+    const anyRewards = profile.rewards && profile.rewards.length > 0;
+
+    badges.push({ id: "firstStar", label: "First Star", emoji: "⭐", earned: anyGood });
+    badges.push({ id: "threeStreak", label: "3-day Streak", emoji: "🔥", earned: streak >= 3 });
+    badges.push({ id: "sevenStreak", label: "7-day Streak", emoji: "🏆", earned: streak >= 7 });
+    badges.push({ id: "taskMaster", label: "Task Master", emoji: "📋", earned: manyTasksToday });
+    badges.push({ id: "rewardHero", label: "Reward Hero", emoji: "🎁", earned: anyRewards });
+    badges.push({ id: "bounceBack", label: "Bounce Back", emoji: "💪", earned: anyBad && anyGood });
+
+    const earnedCount = badges.filter(b => b.earned).length;
+    badgeSummary.textContent = `${earnedCount} earned`;
+
+    // NEW: badge unlock popup (only once per badge)
+    // show only one popup per render to avoid spam
+    if (!badgeModalOpen) {
+      const newlyEarned = badges.find(b => b.earned && !profile.badgesUnlocked.includes(b.id));
+      if (newlyEarned) {
+        profile.badgesUnlocked.push(newlyEarned.id);
+        saveState();
+        confettiBurst(40);
+        playSound("ding");
+        openBadgeModal(`${newlyEarned.label} unlocked! ${newlyEarned.emoji}`);
+      }
+    }
+
+    badgeRow.innerHTML = "";
+    badges.forEach(b => {
+      const div = document.createElement("div");
+      div.className = "badge";
+      if (b.earned) div.classList.add("earned");
+      div.innerHTML = `<div>${b.emoji}</div><div class="badge-label">${b.label}</div>`;
+      badgeRow.appendChild(div);
+    });
+  }
+
+  function ensureDayEntry(profile, dateKey) {
+    if (!profile.days[dateKey]) {
+      profile.days[dateKey] = {
+        completedTaskIds: [],
+        verdict: null
+      };
+    } else {
+      // migrate if needed
+      profile.days[dateKey].completedTaskIds = profile.days[dateKey].completedTaskIds || [];
+      if (!("verdict" in profile.days[dateKey])) profile.days[dateKey].verdict = null;
+    }
+    return profile.days[dateKey];
+  }
+
+  function toggleTaskForToday(taskId) {
+    const profile = getCurrentProfile();
+    const dateKey = getDateKey(selectedDate);
+    const dayEntry = ensureDayEntry(profile, dateKey);
+
+    // NEW: tasks are NEVER locked (even after verdict)
+    const idx = dayEntry.completedTaskIds.indexOf(taskId);
+    if (idx === -1) {
+      dayEntry.completedTaskIds.push(taskId);
+      confettiBurst(14);
+      playSound("pop");
+    } else {
+      dayEntry.completedTaskIds.splice(idx, 1);
+      // no confetti when unchecking
+    }
+
+    saveState();
+    renderDayUI();
+  }
+
+  function setVerdict(type) {
+    const profile = getCurrentProfile();
+    const dateKey = getDateKey(selectedDate);
+    const dayEntry = ensureDayEntry(profile, dateKey);
+
+    // NEW: verdict is NEVER locked; allow changing anytime
+    dayEntry.verdict = type;
+
+    saveState();
+    renderDayUI();
+    renderWeekUI();
+    renderMonthUI();
+
+    // confetti only when setting GOOD
+    if (type === "good") {
+      confettiBurst(55);
+      playSound("ding");
+    }
+
+    // Good Night always (⭐ or ❌), every time verdict is set/changed
+    if (!nightModalOpen) {
+      setTimeout(() => openNightModal(), 250);
+    } else {
+      // if already open, keep it open (no action)
+    }
+  }
+
+  function undoVerdict() {
+    const profile = getCurrentProfile();
+    const dateKey = getDateKey(selectedDate);
+    const dayEntry = profile.days[dateKey];
+    if (!dayEntry) return;
+
+    dayEntry.verdict = null;
+    saveState();
+    renderDayUI();
+    renderWeekUI();
+    renderMonthUI();
+  }
+
+  function renderDayUI() {
+    const today = selectedDate;
+    dayTitle.textContent = "Today";
+    dayDate.textContent = formatShortDate(today);
+
+    const profile = getCurrentProfile();
+    const dateKey = getDateKey(today);
+    const dayEntry = profile.days[dateKey] || {
+      completedTaskIds: [],
+      verdict: null
+    };
+
+    tasksGrid.innerHTML = "";
+    profile.tasks.forEach(task => {
+      const tile = document.createElement("div");
+      tile.className = "task-tile";
+      tile.dataset.taskId = task.id;
+
+      const emojiSpan = document.createElement("span");
+      emojiSpan.className = "emoji";
+      emojiSpan.textContent = task.emoji || "✅";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "label";
+      labelSpan.textContent = task.label;
+
+      tile.appendChild(emojiSpan);
+      tile.appendChild(labelSpan);
+
+      if ((dayEntry.completedTaskIds || []).includes(task.id)) {
+        tile.classList.add("completed");
+      }
+
+      tile.addEventListener("click", () => {
+        toggleTaskForToday(task.id);
+      });
+
+      tasksGrid.appendChild(tile);
+    });
+
+    /* IMPORTANT CHANGE:
+       Removed "+ Add Task" tile from the grid.
+       Add Task is now only in Edit Tasks modal. */
+
+    goodBtn.classList.remove("selected","good");
+    badBtn.classList.remove("selected","bad");
+    if (dayEntry.verdict === "good") {
+      goodBtn.classList.add("selected","good");
+    } else if (dayEntry.verdict === "bad") {
+      badBtn.classList.add("selected","bad");
+    }
+
+    // NEW: tasks are never disabled based on verdict
+    const tiles = tasksGrid.querySelectorAll(".task-tile");
+    tiles.forEach(t => t.classList.remove("disabled"));
+
+    renderQuote(dayEntry.verdict);
+
+    const streak = computeStreak(profile);
+    streakPill.textContent = `Streak: ${streak}🔥`;
+
+    // NEW: streak glow when it increases
+    if (streak > lastStreakValue) {
+      streakPill.classList.add("glow");
+      setTimeout(() => streakPill.classList.remove("glow"), 900);
+    }
+    lastStreakValue = streak;
+
+    renderBadges(profile, streak);
+  }
+
+  function renderWeekUI() {
+    weekGrid.innerHTML = "";
+    const profile = getCurrentProfile();
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    const mondayOffset = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+    const monday = new Date(today);
+    monday.setDate(today.getDate() + mondayOffset);
+
+    const dayNames = ["M","T","W","T","F","S","S"];
+
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const key = getDateKey(d);
+      const entry = profile.days[key];
+
+      const card = document.createElement("div");
+      card.className = "week-day-card";
+
+      const name = document.createElement("div");
+      name.className = "week-day-name";
+      name.textContent = dayNames[i];
+
+      const num = document.createElement("div");
+      num.className = "week-day-num";
+      num.textContent = d.getDate();
+
+      const status = document.createElement("div");
+      status.className = "week-day-status";
+      if (entry && entry.verdict === "good") status.textContent = "⭐";
+      else if (entry && entry.verdict === "bad") status.textContent = "❌";
+      else status.textContent = "·";
+
+      card.appendChild(name);
+      card.appendChild(num);
+      card.appendChild(status);
+      weekGrid.appendChild(card);
+    }
+  }
+
+  function renderMonthUI() {
+    monthGrid.innerHTML = "";
+    const profile = getCurrentProfile();
+
+    const base = new Date();
+    const firstOfMonth = new Date(base.getFullYear(), base.getMonth() + currentMonthOffset, 1);
+    const year = firstOfMonth.getFullYear();
+    const monthIndex = firstOfMonth.getMonth();
+
+    const monthName = firstOfMonth.toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric"
+    });
+    monthTitle.textContent = monthName;
+
+    const dayNames = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    dayNames.forEach(n => {
+      const h = document.createElement("div");
+      h.className = "month-cell-header";
+      h.textContent = n;
+      monthGrid.appendChild(h);
+    });
+
+    const firstDayOfWeek = firstOfMonth.getDay();
+    for (let i = 0; i < firstDayOfWeek; i++) {
+      const empty = document.createElement("div");
+      empty.className = "month-cell";
+      empty.textContent = "";
+      monthGrid.appendChild(empty);
+    }
+
+    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+    const todayKey = getDateKey(new Date());
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellDate = new Date(year, monthIndex, d);
+      const key = getDateKey(cellDate);
+      const entry = profile.days[key] || null;
+
+      const cell = document.createElement("div");
+      cell.className = "month-cell";
+
+      if (key === todayKey) cell.classList.add("today");
+      if (entry && entry.verdict === "good") cell.classList.add("good");
+      else if (entry && entry.verdict === "bad") cell.classList.add("bad");
+
+      const num = document.createElement("div");
+      num.className = "month-day-number";
+      num.textContent = d;
+
+      const status = document.createElement("div");
+      status.className = "month-day-status";
+      if (entry && entry.verdict === "good") status.textContent = "⭐";
+      else if (entry && entry.verdict === "bad") status.textContent = "❌";
+      else status.textContent = "";
+
+      cell.appendChild(num);
+      cell.appendChild(status);
+      monthGrid.appendChild(cell);
+    }
+  }
+
+  /* ===== Continue in PART 2 ===== */
+  // Rewards
+
+  function renderRewardOptions() {
+    rewardOptionsList.innerHTML = "";
+    if (!currentRewardChoices.length) return;
+    currentRewardChoices.forEach((text, index) => {
+      const card = document.createElement("div");
+      card.className = "reward-option-card";
+      const span = document.createElement("span");
+      span.textContent = text;
+      card.appendChild(span);
+
+      card.addEventListener("click", () => {
+        if (rewardChoiceLocked) return;
+        rewardChoiceLocked = true;
+        selectRewardChoice(index);
+      });
+
+      rewardOptionsList.appendChild(card);
+    });
+  }
+
+  function generateRewardChoices() {
+    const shuffled = shuffleArray(rewardPool);
+    currentRewardChoices = shuffled.slice(0,3);
+    rewardChoiceLocked = false;
+    renderRewardOptions();
+  }
+
+  function selectRewardChoice(index) {
+    const cards = rewardOptionsList.querySelectorAll(".reward-option-card");
+    cards.forEach((c,i) => {
+      if (i === index) {
+        c.classList.add("selected");
+      } else {
+        c.classList.add("disabled");
+      }
+    });
+
+    const choiceText = currentRewardChoices[index];
+    const profile = getCurrentProfile();
+    const dateKey = getDateKey(new Date());
+    const id = "reward_" + Date.now().toString(36);
+    profile.rewards.push({
+      id,
+      date: dateKey,
+      reward: choiceText,
+      redeemed: false
+    });
+    saveState();
+    rewardHint.textContent = `You picked: ${choiceText}`;
+    renderRewardHistory(profile);
+    renderBadges(profile, computeStreak(profile));
+  }
+
+  function redeemReward(rewardId) {
+    const profile = getCurrentProfile();
+    const r = profile.rewards.find(x => x.id === rewardId);
+    if (!r) return;
+    r.redeemed = true;
+    saveState();
+    renderRewardHistory(profile);
+  }
+
+  function renderRewardHistory(profile) {
+    rewardHistoryContainer.innerHTML = "";
+    const rewards = profile.rewards.slice().reverse();
+    if (!rewards.length) {
+      const empty = document.createElement("div");
+      empty.className = "small";
+      empty.textContent = "No rewards yet. Spin the wheel and choose one.";
+      rewardHistoryContainer.appendChild(empty);
+      return;
+    }
+
+    rewards.forEach(r => {
+      const item = document.createElement("div");
+      item.className = "history-item";
+
+      const main = document.createElement("div");
+      main.className = "history-main";
+
+      const topLine = document.createElement("div");
+      topLine.textContent = r.reward;
+
+      const dateLine = document.createElement("div");
+      dateLine.className = "small";
+      dateLine.textContent = r.date;
+
+      main.appendChild(topLine);
+      main.appendChild(dateLine);
+      item.appendChild(main);
+
+      if (r.redeemed) {
+        const label = document.createElement("div");
+        label.className = "redeemed-label";
+        label.textContent = "Redeemed ✔";
+        item.appendChild(label);
+      } else {
+        const btn = document.createElement("button");
+        btn.className = "redeem-btn";
+        btn.textContent = "Redeem";
+        btn.addEventListener("click", () => redeemReward(r.id));
+        item.appendChild(btn);
+      }
+
+      rewardHistoryContainer.appendChild(item);
+    });
+  }
+
+  function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+    rewardHint.textContent = "Spinning...";
+    rewardOptionsList.innerHTML = "";
+    currentRewardChoices = [];
+    rewardChoiceLocked = false;
+
+    const extraTurns = 3 + Math.floor(Math.random() * 3); // 3-5 turns
+    const randomAngle = Math.floor(Math.random() * 360);
+    const finalAngle = currentWheelRotation + extraTurns * 360 + randomAngle;
+    currentWheelRotation = finalAngle % 360;
+
+    rewardWheel.style.transform = `rotate(${finalAngle}deg)`;
+
+    setTimeout(() => {
+      isSpinning = false;
+      rewardHint.textContent = "Choose your reward:";
+      generateRewardChoices();
+    }, 2500);
+  }
+
+  // Edit tasks modal
+
+  function renderEditTasksList() {
+    const profile = getCurrentProfile();
+    editTasksList.innerHTML = "";
+    profile.tasks.forEach((t, idx) => {
+      const row = document.createElement("div");
+      row.className = "edit-task-row";
+
+      const main = document.createElement("div");
+      main.className = "edit-task-main";
+
+      const emojiSpan = document.createElement("span");
+      emojiSpan.className = "edit-task-emoji";
+      emojiSpan.textContent = t.emoji || "✅";
+
+      const labelSpan = document.createElement("span");
+      labelSpan.className = "edit-task-label";
+      labelSpan.textContent = t.label;
+
+      main.appendChild(emojiSpan);
+      main.appendChild(labelSpan);
+
+      const btns = document.createElement("div");
+      btns.className = "edit-task-buttons";
+
+      const upBtn = document.createElement("button");
+      upBtn.className = "small-icon-btn";
+      upBtn.textContent = "↑";
+      upBtn.addEventListener("click", () => moveTask(idx, -1));
+
+      const downBtn = document.createElement("button");
+      downBtn.className = "small-icon-btn";
+      downBtn.textContent = "↓";
+      downBtn.addEventListener("click", () => moveTask(idx, 1));
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "small-icon-btn";
+      delBtn.textContent = "🗑️";
+      delBtn.addEventListener("click", () => deleteTask(idx));
+
+      btns.appendChild(upBtn);
+      btns.appendChild(downBtn);
+      btns.appendChild(delBtn);
+
+      row.appendChild(main);
+      row.appendChild(btns);
+
+      editTasksList.appendChild(row);
+    });
+  }
+
+  function moveTask(index, direction) {
+    const profile = getCurrentProfile();
+    const tasks = profile.tasks;
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= tasks.length) return;
+    const [moved] = tasks.splice(index, 1);
+    tasks.splice(newIndex, 0, moved);
+    saveState();
+    renderEditTasksList();
+  }
+
+  function deleteTask(index) {
+    const profile = getCurrentProfile();
+    profile.tasks.splice(index, 1);
+    saveState();
+    renderEditTasksList();
+    renderDayUI();
+  }
+
+  function openTaskModal() {
+    taskEmojiInput.value = "";
+    taskLabelInput.value = "";
+    taskModal.classList.add("open");
+  }
+
+  function closeTaskModal() {
+    taskModal.classList.remove("open");
+  }
+
+  function openEditTasksModal() {
+    renderEditTasksList();
+    editTasksModal.classList.add("open");
+  }
+
+  function closeEditTasksModal() {
+    editTasksModal.classList.remove("open");
+    renderDayUI();
+  }
+
+  function openProfileModal() {
+    profileNameInput.value = "";
+    profileEmojiInput.value = "";
+    profileModal.classList.add("open");
+  }
+
+  function closeProfileModal() {
+    profileModal.classList.remove("open");
+  }
+
+  function openAvatarModal() {
+    buildAvatarEmojiGrid();
+    avatarModal.classList.add("open");
+  }
+
+  function closeAvatarModal() {
+    avatarModal.classList.remove("open");
+  }
+
+  function addProfile(name, emoji) {
+    const id = name.toLowerCase().replace(/\s+/g,"_") + "_" + Date.now().toString(36);
+    state.profiles[id] = {
+      id,
+      name,
+      avatarEmoji: emoji || "🙂",
+      avatarImageData: null,
+      tasks: JSON.parse(JSON.stringify(defaultTasks)),
+      days: {},
+      rewards: [],
+      badgesUnlocked: []
+    };
+    currentProfileId = id;
+    state.activeProfileId = id;
+    saveState();
+    renderAllViews();
+  }
+
+  function deleteCurrentProfile() {
+    const ids = Object.keys(state.profiles);
+    if (ids.length <= 1) {
+      alert("You need at least one profile.");
+      return;
+    }
+    if (!confirm("Delete this profile and all its data?")) return;
+    delete state.profiles[currentProfileId];
+    const remaining = Object.keys(state.profiles);
+    currentProfileId = remaining[0];
+    state.activeProfileId = currentProfileId;
+    saveState();
+    renderAllViews();
+  }
+
+  function changeAvatarEmoji(emoji) {
+    const p = getCurrentProfile();
+    p.avatarEmoji = emoji || "🙂";
+    p.avatarImageData = null;
+    saveState();
+    renderProfilesUI();
+  }
+
+  function changeAvatarImage(dataUrl) {
+    const p = getCurrentProfile();
+    p.avatarImageData = dataUrl;
+    saveState();
+    renderProfilesUI();
+  }
+
+  function buildAvatarEmojiGrid() {
+    avatarEmojiGrid.innerHTML = "";
+    avatarAnimals.forEach(em => {
+      const btn = document.createElement("button");
+      btn.className = "avatar-emoji-btn";
+      btn.textContent = em;
+      btn.addEventListener("click", () => {
+        changeAvatarEmoji(em);
+        closeAvatarModal();
+      });
+      avatarEmojiGrid.appendChild(btn);
+    });
+  }
+
+  function setView(viewName) {
+    dayView.classList.remove("active");
+    weekView.classList.remove("active");
+    monthView.classList.remove("active");
+    rewardsView.classList.remove("active");
+
+    if (viewName === "day") dayView.classList.add("active");
+    if (viewName === "week") weekView.classList.add("active");
+    if (viewName === "month") monthView.classList.add("active");
+    if (viewName === "rewards") rewardsView.classList.add("active");
+
+    const buttons = sideMenu.querySelectorAll(".view-btn");
+    buttons.forEach(btn => {
+      if (btn.dataset.view === viewName) btn.classList.add("active");
+      else btn.classList.remove("active");
+    });
+
+    if (viewName === "rewards") {
+      const profile = getCurrentProfile();
+      rewardHint.textContent = "";
+      currentRewardChoices = [];
+      rewardOptionsList.innerHTML = "";
+      renderRewardHistory(profile);
+    }
+  }
+
+  function renderAllViews() {
+    renderProfilesUI();
+    renderDayUI();
+    renderWeekUI();
+    renderMonthUI();
+    const profile = getCurrentProfile();
+    renderRewardHistory(profile);
+  }
+
+  // Events
+
+  menuButton.addEventListener("click", () => {
+    menuBackdrop.classList.add("open");
+    sideMenu.classList.add("open");
+  });
+
+  menuBackdrop.addEventListener("click", (e) => {
+    if (e.target === menuBackdrop) {
+      menuBackdrop.classList.remove("open");
+      sideMenu.classList.remove("open");
+    }
+  });
+
+  sideMenu.querySelectorAll(".view-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      setView(btn.dataset.view);
+      menuBackdrop.classList.remove("open");
+      sideMenu.classList.remove("open");
+    });
+  });
+
+  openRewardsViewBtn.addEventListener("click", () => {
+    setView("rewards");
+    menuBackdrop.classList.remove("open");
+    sideMenu.classList.remove("open");
+  });
+
+  profileSelect.addEventListener("change", () => {
+    currentProfileId = profileSelect.value;
+    state.activeProfileId = currentProfileId;
+    saveState();
+    renderAllViews();
+  });
+
+  // Verdict buttons: always changeable
+  goodBtn.addEventListener("click", () => {
+    const p = getCurrentProfile();
+    const key = getDateKey(selectedDate);
+    const entry = ensureDayEntry(p, key);
+    entry.verdict = (entry.verdict === "good") ? null : "good";
+    saveState();
+    renderDayUI(); renderWeekUI(); renderMonthUI();
+  });
+
+  badBtn.addEventListener("click", () => {
+    const p = getCurrentProfile();
+    const key = getDateKey(selectedDate);
+    const entry = ensureDayEntry(p, key);
+    entry.verdict = (entry.verdict === "bad") ? null : "bad";
+    saveState();
+    renderDayUI(); renderWeekUI(); renderMonthUI();
+  });
+
+  if (undoVerdictBtn) {
+    undoVerdictBtn.addEventListener("click", () => undoVerdict());
+  }
+
+  cancelTaskBtn.addEventListener("click", closeTaskModal);
+  saveTaskBtn.addEventListener("click", () => {
+    const emoji = taskEmojiInput.value.trim() || "✅";
+    const label = taskLabelInput.value.trim();
+    if (!label) {
+      alert("Please enter a task name.");
+      return;
+    }
+    const profile = getCurrentProfile();
+    const id = label.toLowerCase().replace(/\s+/g,"_") + "_" + Date.now().toString(36);
+    profile.tasks.push({ id, label, emoji });
+    saveState();
+    closeTaskModal();
+    renderEditTasksList();
+    renderDayUI();
+  });
+
+  editTasksBtn.addEventListener("click", () => openEditTasksModal());
+  closeEditTasksBtn.addEventListener("click", () => closeEditTasksModal());
+
+  // NEW: Add task button inside Edit Tasks
+  addTaskFromEditBtn.addEventListener("click", () => {
+    openTaskModal();
+  });
+
+  addProfileBtn.addEventListener("click", () => openProfileModal());
+  cancelProfileBtn.addEventListener("click", closeProfileModal);
+  saveProfileBtn.addEventListener("click", () => {
+    const name = profileNameInput.value.trim();
+    let emoji = profileEmojiInput.value.trim();
+    if (!name) {
+      alert("Please enter a name.");
+      return;
+    }
+    if (!emoji) emoji = "🙂";
+    addProfile(name, emoji);
+    closeProfileModal();
+  });
+
+  deleteProfileBtn.addEventListener("click", () => deleteCurrentProfile());
+
+  headerAvatar.addEventListener("click", () => openAvatarModal());
+  changeAvatarEmojiBtn.addEventListener("click", () => openAvatarModal());
+  closeAvatarBtn.addEventListener("click", () => closeAvatarModal());
+
+  avatarFileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const dataUrl = ev.target.result;
+      changeAvatarImage(dataUrl);
+      closeAvatarModal();
+      avatarFileInput.value = "";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  spinWheelBtn.addEventListener("click", () => spinWheel());
+
+  prevMonthBtn.addEventListener("click", () => {
+    currentMonthOffset--;
+    renderMonthUI();
+  });
+  nextMonthBtn.addEventListener("click", () => {
+    currentMonthOffset++;
+    renderMonthUI();
+  });
+
+  // NEW: sound switch toggle (OFF by default)
+  soundSwitch.addEventListener("click", () => {
+    ensureSettings();
+    state.settings.soundsEnabled = !state.settings.soundsEnabled;
+    saveState();
+    setSoundSwitchUI();
+    if (state.settings.soundsEnabled) {
+      playSound("ding");
+    }
+  });
+
+  // NEW: close modals
+  closeBadgeModalBtn.addEventListener("click", closeBadgeModal);
+  closeNightBtn.addEventListener("click", closeNightModal);
+
+  // If backdrop clicked, close badge/night too
+  badgeModal.addEventListener("click", (e) => {
+    if (e.target === badgeModal) closeBadgeModal();
+  });
+  nightModal.addEventListener("click", (e) => {
+    if (e.target === nightModal) closeNightModal();
+  });
+
+  loadState();
+  renderAllViews();
+  setView("day");
+})();
+</script>
+</body>
+</html>
